@@ -1,0 +1,11 @@
+    
+Class:
+FoxAndFencing
+Method:
+WhoCanWin
+Parameters:
+int, int, int, int, int
+Returns:
+string
+Method signature:
+string WhoCanWin(int mov1, int mov2, int rng1, int rng2, int d)
