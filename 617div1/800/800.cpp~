@@ -1,0 +1,69 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+class FarStrings
+{
+public:
+  vector <string> find(string t);
+};
+vector <string> FarStrings::find(string t)
+{
+  vector<string> ans;
+  int n = t.size();
+  string ns = t;
+  for( int i = 0, j = 0; i < n; ++i )
+    {
+      int kk = -1;
+      for( int k = 0; k < n; ++k )
+	if( ( ( 1 << k ) & j ) == 0 )
+	  {
+	    kk = k;
+	    if( t[k] > 'a' )
+		break;
+	  }
+      j |= ( 1 << kk );
+      if( t[kk] == 'a' )
+	{
+	  ns[kk] = 'b';
+	}
+      else ns[kk] = 'a';
+      cout << ns << endl;
+      ans.push_back( ns );
+    }
+  return ans;
+}
+int main()
+{
+  class FarStrings a;
+  string t = "atan";
+  a.find(t);
+  return 0;
+}

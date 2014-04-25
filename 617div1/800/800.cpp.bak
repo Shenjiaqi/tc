@@ -1,0 +1,102 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+class FarStrings
+{
+public:
+  vector <string> find(string t);
+};
+const int N = 26;
+// int dp[N][N][N];
+// int ch[N][N][N];
+// int mi[N][N];
+// int pi[N][N];
+bool dp[N][N][N][N];
+const int inf = 1e9;
+vector <string> FarStrings::find(string t)
+{
+  for( auto i : t )
+    i -= 'a';
+  int n = t.size();
+  for( int i = 0; i < N; ++i )
+    for( int j = 0; j < N; ++j )
+      mi[i][j] = inf;
+  mi[n][n] = 0;
+  for( int i = n - 1; i >= 0; --i )
+    {
+      for( int k = 0; k < N; ++k )
+	{
+	  dp[i][n][k] = n - i;
+	  mi[i][n] = n - i;
+	  for( int j = n - 1; j >= 0; --j )
+	    {
+	      // replace
+	      dp[i][j][k] = ( k == t[j] ? 0 : 1 ) + mi[i + 1][j + 1];
+	      ch[i][j][k] = 0;
+	      // del
+	      if( dp[i][j][k] < 1 + mi[ i + 1 ][j] )
+		dp[i][j][k] = 1 + mi[ i + 1 ][j], ch[i][j][k] = 1;
+	      // add
+	      if( dp[i][j][k] < 1 + dp[i][ j + 1 ][k] )
+		dp[i][j][k] = 1 + dp[i][ j + 1 ][k], ch[i][j][k] = 1;
+
+	      if( mi[i][j] > dp[i][j][k] )
+		mi[i][j] = dp[i][j][k], pi[i][j] = k;
+	    }
+	}
+    }
+  vector<string> ans;
+  for( int i = 1; i <= n; ++i )
+    for( int j = 0; ; ++j )
+      if( dp[0][0][j] == i )
+	{
+	  string s;
+	  for( int k = 0, c = 0, v = n; k < n; ++k )
+	    {
+	      for( int l = 0; ; ++l )
+		if( dp[k][c][l] == v )
+		  {
+		    s.push_back( (char)( l + 'a' ) );
+		    
+		    break;
+		  }
+	    }
+	  break;
+	}
+  return ans;
+}
+int main()
+{
+  class FarStrings a;
+  string t = "atan";
+  a.find(t);
+  return 0;
+}
