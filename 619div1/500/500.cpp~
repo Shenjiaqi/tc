@@ -1,0 +1,111 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+class GoodCompanyDivOne
+{
+public:
+  int minimumCost(vector <int> superior, vector <int> training);
+};
+int GoodCompanyDivOne::minimumCost(vector <int> su, 
+				   vector <int> tr)
+{
+  int n = su.size();
+  vector<int> du;
+  du.resize(n);
+  for( int i = 1; i < n; ++i )
+    ++du[ su[i] ];
+  queue<int> que;
+  for( int i = 0; i < n; ++i )
+    if( du[i] == 0 )
+      que.push(i);
+    else if( du[i] + 1 > tr.size() )
+      return -1;
+  vector<vector<int> > ch;
+  ch.resize(n);
+  int ans(0);
+  sort( tr.begin(), tr.end() );
+  for( ; !que.empty(); )
+    {
+      int v = que.front();
+      que.pop();
+      if( su[v] >= 0 )
+	{
+	  --du[ su[v] ];
+	  if( du[ su[v] ] == 0 )
+	    que.push( su[v] );
+	}
+      int mv = 2;
+      int left = 2;
+      sort( ch[v].begin(), ch[v].end() );
+      for( int i = 0; i < ch[v].size(); ++i )
+	{
+	  int val = ch[v][i];
+	  if( val > mv )
+	    left += val - mv;
+	  --left;
+	  if( left < 0 )
+	    {
+	      ++mv, ++left;
+	      //
+	      if( mv > val )
+		ans += ( tr[ mv - 1 ] - tr[ val - 1 ] );
+		// ans += ( tr[ mv - 1 ] + tr[ mv - 2 ] -
+		// 	 tr[ val - 1 ] - tr[ val - 2 ] );
+	    }
+	}
+      if( left == 0 )
+	++mv;
+      if( su[v] >= 0 )
+	ch[ su[v] ].push_back( mv );
+      // ans += tr[ mv - 1 ] + tr[ mv - 2 ];
+      ans += tr[ mv - 1 ] + tr[0];
+    }
+  return ans;
+}
+int main()
+{
+  class GoodCompanyDivOne a;
+  // int ss[] = {-1};
+  // int tt[] = { 1, 2};
+  // int ss[] = {-1, 0, 0};
+  // int tt[] = {1, 2, 3};
+  // int ss[] = {-1, 0, 0, 0};
+  // int tt[] =  {1, 2, 3};
+  int ss[] = {-1, 0, 0, 2, 2, 2, 1, 1, 6, 0, 5, 4, 11, 10, 3, 6, 11, 7, 0, 2, 13, 14, 2, 10, 9, 11, 22, 10, 3};
+  int tt[] = {4, 2, 6, 6, 8, 3, 3, 1, 1, 5, 8, 6, 8, 2, 4};
+ vector<int> s, t;
+  for( int i = 0; i < sizeof(ss) / sizeof(ss[0]); ++i )
+    s.push_back( ss[i] );
+  for( int i = 0; i < sizeof(tt) / sizeof(tt[0]); ++i )
+    t.push_back( tt[i] );
+  cout << a.minimumCost( s, t);
+  return 0;
+}

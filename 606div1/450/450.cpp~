@@ -1,0 +1,76 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+class EllysPairing
+{
+public:
+  int getMax(int M, vector <int> count, vector <int> first, vector <int> mult, vector <int> add);
+};
+int EllysPairing::getMax(int m, vector <int> cnt,
+			 vector <int> fir, vector <int> mul,
+			 vector <int> add)
+{
+  map<int,int> mapp;
+  int all=0;
+  for(int i=0;i<cnt.size();++i)
+    {
+      all+=cnt[i];
+      unsigned int val=fir[i];
+      ++mapp[val];
+      for(int j=1;j<cnt[i];++j)
+	{
+	  val=((unsigned int)mul[i]*val+(unsigned int)add[i])&(m-1);
+	  ++mapp[val];
+	}
+    }
+  int tmp=all/2;
+  FR(i,mapp)
+    {
+      if(tmp>=i->SEC)
+	tmp-=i->SEC;
+      else
+	{
+	  tmp=(i->SEC-tmp)/2;
+	}
+      if(tmp==0)
+	break;
+    }
+  return (all/2-tmp);
+}
+int main()
+{
+  class EllysPairing a;
+  cout<<a.getMax(cnt,fir,mul,add)<<endl;
+#ifdef LOCAL_DEFINE
+  cerr << "Time elapsed: " << 1.0 * clock() / CLOCKS_PER_SEC << " s.\n";
+#endif
+  return 0;
+}
