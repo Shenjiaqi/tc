@@ -1,0 +1,91 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+//#include <unordered_set>
+//#include <unordered_map>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+class SixteenBricks
+{
+  int maximumSurface(vector <int> height);
+};
+int dp[1 << 16][3][3][3][3];
+int SixteenBricks::maximumSurface(vector <int> height)
+{
+  queue<int> q;
+  q.push(0);
+  for( int row = 0; row < 4; ++row )
+    for( int col = 0; col < 4; ++col )
+      {
+	q.push(-1);
+	for( ; ; )
+	  {
+	    int v = q.front();
+	    q.pop();
+	    if( v == -1 )
+	      break;
+	    int a = v >> 16;
+	    int aa, bb;
+	    if( i < 2 )
+	      {
+		vector<int> p;
+		for( int i = 0; i < 16; ++i )
+		  if( ( 1 << i ) & a )
+		    p.push_back( 
+		for( int j = 0; j < 16; ++j )
+		  if( ( ( 1 << j ) & a ) == 0 )
+		    {
+		      aa = a | 1;
+		      int vv = ( aa << 16 );
+		      for( int k = 0; k < 4; ++k )
+			if( j != k )
+			  vv |= ( c[k] << ( k * 3 ) );
+			else
+			  vv |= ( j << ( k * 3 ) );
+		      if( dp[vv] == 0 )
+			{
+			  dp[vv] = m + 1;
+			  if( j == 0 )
+			    dp[vv] += height[j];
+			  else dp[vv] += abs( height[j] - height[ c[ j - 1] ] );
+			  if( i == 0 )
+			    dp[vv] += height[j];
+			  else
+			    dp[vv] += abs( height[j] - height[ c[j] ] );
+			}
+		    }
+	      }
+	  }
+      }
+}
+
+int main()
+{
+  return 0;
+}
