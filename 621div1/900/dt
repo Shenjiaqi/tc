@@ -1,0 +1,22 @@
+digraph s{
+C_0 -> C_1[ label = "a" ];
+C_0 -> C_2[ label = "b" ];
+C_0 -> C_3[ label = "c" ];
+C_1 -> C_2[ label = "b" ];
+C_1 -> C_0[ style = dotted ];
+C_2 -> C_3[ label = "c" ];
+C_2 -> C_0[ style = dotted ];
+C_3 -> C_4[ label = "a" ];
+C_3 -> C_0[ style = dotted ];
+C_4 -> C_5[ label = "b" ];
+C_4 -> C_1[ style = dotted ];
+C_5 -> C_6[ label = "c" ];
+C_5 -> C_2[ style = dotted ];
+C_6 -> C_7[ label = "a" ];
+C_6 -> C_3[ style = dotted ];
+C_7 -> C_8[ label = "b" ];
+C_7 -> C_4[ style = dotted ];
+C_8 -> C_9[ label = "c" ];
+C_8 -> C_5[ style = dotted ];
+C_9 -> C_6[ style = dotted ];
+}

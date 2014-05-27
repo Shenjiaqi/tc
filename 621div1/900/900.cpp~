@@ -1,0 +1,125 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+//#include <unordered_set>
+//#include <unordered_map>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+class StringsNightmareAgain
+{
+public:
+  long long UniqueSubstrings(int a, int b, int c, int d, int n);
+};
+const int N = 1e5 + 7;
+char s[N];
+struct e
+{
+  int g[2];
+  int nxt;
+  int len;
+  int cnt;
+  int pos;
+}p[N * 2];
+int lst, num;
+void add( int v, int pos )
+{
+  ++num;
+  p[num].len = p[lst].len + 1;
+  p[num].pos = pos;
+  memset( &p[num].g, -1, sizeof(p[num].g) );
+  int i = lst;
+  lst = num;
+  p[num].cnt = 1;
+  for( ; i >= 0 && p[i].g[v] < 0; i = p[i].nxt )
+    {
+      p[i].g[v] = lst;
+    }
+  if( i < 0 )
+    {
+      p[lst].nxt = 0;
+    }
+  else
+    {
+      int j = p[i].g[v];
+      if( p[i].len + 1 == p[j].len )
+	{
+	  p[lst].nxt = j;
+	  // if( pos - p[i].pos > p[j].len )
+	    ++p[j].cnt;
+	}
+      else
+	{
+	  ++num;
+	  memcpy( &p[num], &p[j], sizeof(p[num]) );
+	  p[num].len = p[i].len + 1;
+	  p[lst].nxt = p[j].nxt = num;
+	  // if( pos - p[i].pos > p[num].len )
+	    ++p[num].cnt;
+	  for( ; i >= 0 && p[i].g[v] == j; i = p[i].nxt )
+	    {
+	      p[i].g[v] = num;
+	    }
+	}
+    }
+}
+long long StringsNightmareAgain::UniqueSubstrings(int a, 
+						  int b, 
+						  int c, 
+						  int d, 
+						  int n)
+{
+  for( int i = 0 ; i < a; ++i )
+    {
+      b = ( (ll)b * (ll)c + d ) % n;
+      s[b] = 1;
+    }
+  p[0].nxt = -1;
+  memset( p[0].g, -1, sizeof(p[0].g) );
+  p[0].pos = -1;
+  for( int i = 0; i < n; ++i )
+    {
+      add(s[i], i);
+    }
+  ll ans(0);
+  for( int i = 1; i <= num; ++i )
+    {
+      if( p[i].cnt > 1 )
+	{
+	  ans += p[i].len - p[ p[i].nxt ].len;
+	}
+      cout << i << ' ' << p[i].cnt << endl;
+    }
+  return ans;
+}
+int main()
+{
+  StringsNightmareAgain a;
+  cout << a.UniqueSubstrings( 0, 0, 0 , 0, 4) << endl;
+  return 0;
+}
