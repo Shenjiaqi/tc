@@ -40,57 +40,115 @@ const int N = 57;
 const int M = 507;
 const int inf = N;
 vector<pair<int,int> >  p[N];
-int dp[N][M];
+vector<pair<int,int> > dp[N];
+multiset<int, greater<int> > sett;
+int ans, kk;
+bool same;
+void ddfs( int v, int from, int lev, int md, int sum )
+{
+  if( lev == p[v].size() )
+    {
+      int tAns = sum;
+      if( !sett.empty() )
+	{
+	  for(auto i =sett.begin() ; tAns < ans; )
+	    {
+	      ++tAns;
+	      auto j = i;
+	      ++j;
+	      if( j == sett.end() )
+		break;
+	      if( *i + *j <= kk )
+		break;
+	      i = j;
+	    }
+	}
+      else if( md < 0 )
+	{
+	  ++tAns;
+	}
+      // if( v == 4 && md == 5 )
+      // 	cout << sum << ' ' << *sett.begin() << ' ' << tAns << endl;
+      ans = min( ans, tAns);
+    }
+  else
+    {
+      int t = p[v][lev].first;
+      if( t != from )
+	{
+	  for( int i = 0; i < dp[t].size(); ++i )
+	    {
+	      int tDis = dp[t][i].first;
+	      bool need = false;
+	      bool setSame = false;
+	      if( tDis == md )
+		{
+		  if( same )
+		    {
+		      if( tDis > kk - md )
+			need = true;
+		    }
+		  else same = setSame = true;
+		}
+	      else if( tDis > md || tDis > kk - md )
+		need = true;
+	      if( need )
+		sett.insert( tDis );
+	      ddfs( v, from, lev + 1, md, sum + dp[t][i].second );
+	      if( need )
+		sett.erase( sett.find( tDis ) );
+	      if( setSame )
+		same = false;
+	    }
+	}
+      else
+	ddfs( v, from, lev + 1, md, sum);
+    }
+}
 void dfs( int v, int from, const int &md )
 {
-  if( !p[v].empty() )
-    {
-      dp[v][0] = 1;
-      return ;
-    }
-  int sum[M] = {0};
   for( int i = 0; i < p[v].size(); ++i )
     {
       int t = p[v][i].first;
       if( t != from )
 	{
-	  dfs( t, v, md );
-	  int dis = p[v][i].second;
-	  for( int j = 0; j <= dis; ++j )
-	    sum[0] += dp[t][0];
-	  for( int j = 1; j + dis <= md; ++j )
-	    sum[ j + dis ] += dp[t][j];
+	  dfs( t, v, md);
 	}
     }
-  for( int i = 0; i <= md; ++i )
-    dp[v][i] = inf;
+  vector<int> lst;
+  lst.push_back(-1);
+  lst.push_back(0);
   for( int i = 0; i < p[v].size(); ++i )
     {
       int t = p[v][i].first;
       if( t != from )
 	{
 	  int dis = p[v][i].second;
-	  for( int j = 0; j <= md; ++j )
+	  for( int j = 1; j < dp[t].size(); ++j )
 	    {
-	      int tmp;
-	      if( j <= dis )
-		tmp = dp[t][0];
-	      else
-		tmp = dp[t][ j - dis ];
-	      tmp += sum[ md - j ];
-	      if( md - j <= dis )
-		tmp -= dp[t][0];
-	      else tmp -= dp[t][ md - j - dis ];
-	      dp[v][j] = min( dp[v][j], tmp );
-	      dp[v][0] = min( dp[v][0], 1 + tmp );
+	      int tDis = dis + dp[t][j].first;
+	      if( tDis > md )
+		{
+		  dp[t].resize( j );
+		  break;
+		}
+	      dp[t][j].first = tDis;
+	      lst.push_back( tDis );
 	    }
 	}
     }
-  for( int i = 1; i <= md; ++i )
-    dp[v][i] = min( dp[v][i], dp[v][ i - 1 ] );
+  sort( lst.begin(), lst.end() );
+  lst.resize( unique( lst.begin(), lst.end() ) - lst.begin() );
+  for( int i = 0; i < lst.size(); ++i )
+    {
+      ans = inf;
+      ddfs( v, from, 0, lst[i], 0);
+      dp[v].push_back( make_pair( lst[i], ans ) );
+    }
 }
 int Ethernet::connect(vector <int> par, vector <int> dst, int md)
 {
+  kk = md;
   int n = par.size() + 1;
   for( int i = 1; i < n; ++i )
     {
@@ -100,19 +158,32 @@ int Ethernet::connect(vector <int> par, vector <int> dst, int md)
       p[b].push_back( make_pair( a, dst[ i - 1 ] ) );
     }
   dfs( 0, 0, md );
-  return dp[0][0];
+  return dp[0][0].second;
 }
 int main()
 {
   Ethernet a;
   // int b[] = {0, 0, 0};
   // int c[] = {1, 1, 1};
-  int b[] = {0,0,0,0,0,0,0};
-  int c[] = {1,2,3,4,5,6,7};
+
+  // int b[] = {0,0,0,0,0,0,0};
+  // int c[] = {1,2,3,4,5,6,7};
+
+  int b[] = {0,1,2,3,4,5};
+  int c[] = {1,2,3,4,5,6};
+
+  // int b[] = {0,1,0,3,0,5,0,6,0,6,0,6,4,6,9,4,5,5,2,5,2};
+  // int c[] = {93,42,104,105,59,73,161,130,30,81,62,93,131,
+  // 	     133,139,5,13,34,25,111,4};
+
+  // int b[] = {0,0,0,1,1};
+  // int c[] = {1,1,1,1,1};
   vector<int> bb, cc;
   for( int i = 0; i < sizeof(b) / sizeof(b[0]); ++i )
     bb.push_back( b[i] ),
       cc.push_back( c[i] );
-  cout << a.connect( bb, cc, 2 ) << endl;
+  cout << a.connect( bb, cc, 6 ) << endl;
+  for( auto i : dp[4] )
+    cout << i.first << ' ' << i.second << endl;
   return 0;
 }
