@@ -1,0 +1,522 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <fstream>
+#include <cassert>
+#include <set>
+#include <queue>
+#include <iostream>
+#include <utility>
+#include <stack>
+#include <complex>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <list>
+#include <functional>
+#include <cctype>
+#include <unordered_set>
+#include <unordered_map>
+using namespace std;
+typedef long double ld;
+typedef long long ll;
+typedef pair<int,int> ppi;
+typedef pair<ll,ll> ppl;
+typedef pair<double,double> ppd;
+#define PB push_back
+#define MP make_pair
+#define FIR first
+#define SEC second
+#define FOR(a,b,c) for(int a=(b);a<(c);++a)
+#define FR(a,b) for(typeof(b.begin()) a=b.begin();a!=b.end();++a)
+class LaserTowersDiv1
+{
+public:
+  int countMaxEnemies(vector <string> board);
+};
+const int N = 57;
+const int inf = 1e7;
+int p[N][N];
+typedef struct 
+{
+  int to;
+  int cap;
+  int price;
+  int pre;
+} ele;
+vector<ele> q;
+int qoi;
+int S, T;
+vector<int> s;
+vector<int> pre, use;
+vector<bool> in;
+vector<int> dis, flow;
+void add( int f, int t, int cap, int pri)
+{
+  // cout << f << ' ' << t << ' ' << cap << ' ' << pri << endl;
+  // pri = 0;
+  if( s.size() <= f || s.size() <= t )
+    s.resize( max( f, t) + 1);
+  if( q.empty() )
+    q.resize( 3 );
+  else q.resize( q.size() + 2 );
+  ++qoi;
+  q[qoi].to = t, q[qoi].cap = cap, q[qoi].price = pri, q[qoi].pre = s[f],
+    s[f] = qoi;
+  ++qoi;
+  q[qoi].to = f, q[qoi].cap = 0, q[qoi].price = -pri, q[qoi].pre = s[t],
+    s[t] = qoi;
+}
+bool dfs()
+{
+  if( s.empty() )
+    return false;
+  fill( dis.begin(), dis.end(), inf);
+  fill( flow.begin(), flow.end(), 0);
+  queue<int> que;
+  in[S] = true;
+  flow[S] = inf;
+  que.push(S);
+  for( ; !que.empty(); )
+    {
+      int v = que.front();
+      que.pop();
+      in[v] = false;
+      for( int i = s[v]; i; i = q[i].pre) 
+	{
+	  int to = q[i].to;
+	  if( q[i].cap > 0 && ( dis[to] > dis[v] + q[i].price ||
+				( dis[to] == dis[v] + q[i].price &&
+				  min( flow[v], q[i].cap) > flow[to] )) )
+	    {
+	      dis[to] = dis[v] + q[i].price;
+	      flow[to] = min( flow[v], q[i].cap);
+	      pre[to] = v;
+	      use[to] = i;
+	      if( !in[to] )
+		{
+		  in[to] = true;
+		  que.push( to );
+		}
+	    }
+	}
+    }
+  return flow[T] > 0;
+}
+int mmf()
+{
+  int r(0);
+  pre.resize( s.size() );
+  in.resize( s.size() );
+  dis.resize( s.size() );
+  flow.resize( s.size() );
+  use.resize( s.size() );
+  for( ; dfs(); )
+    {
+      int tmp = flow[T];
+      r += tmp;
+      for( int i = T; i != S; i = pre[i] )
+	{
+	  int idx = use[i];
+	  q[idx].cap -= tmp;
+	  q[idx + ( ( idx & 1 ) ? 1 : -1 )].cap += tmp;
+	}
+    }
+  return r;
+}
+vector<int> c, lev;
+bool bfs()
+{
+  c = s;
+  fill( lev.begin(), lev.end(), 0 );
+  lev[S] = 1;
+  queue<int> que;
+  que.push(S);
+  for( ; !que.empty(); )
+    {
+      int v = que.front();
+      que.pop();
+      for( int i = c[v]; i; i = q[i].pre )
+	if( q[i].cap > 0 )
+	  {
+	    int to = q[i].to;
+	    if( lev[to] == 0 )
+	      {
+		lev[to] = 1 + lev[v];
+		que.push(to);
+	      }
+	  }
+    }
+  return lev[T] != 0;
+}
+int dfs( int v, int flo)
+{
+  if( v == T )
+    return flo;
+  int rf = flo;
+  int i = c[v];
+  for( ; i; i = q[i].pre )
+    {
+      int to = q[i].to;
+      if( lev[to] == lev[v] + 1 && q[i].cap > 0 )
+	{
+	  int tmp = dfs( to, min( flo, q[i].cap ) );
+	  q[i].cap -= tmp;
+	  flo -= tmp;
+	  q[i + ( ( i & 1 ) ? 1 : -1 ) ].cap += tmp;
+	  if( flo == 0 )
+	    break;
+	}
+    }
+  c[v] = i;
+  return rf - flo;
+}
+int mf()
+{
+  lev.resize( s.size() + 1 );
+  int r(0);
+  for( ; bfs(); )
+    {
+      for( ; ; )
+	{
+	  int tmp = dfs( S, inf);
+	  if( tmp == 0 )
+	    break;
+	  r += tmp;
+	}
+    }
+  return r;
+}
+int LaserTowersDiv1::countMaxEnemies(vector <string> board)
+{
+  int n = board.size();
+  int m = board[0].size();
+  int cnt = 0;
+  S = ++cnt;
+  T = ++cnt;
+  int sum(0);
+  for( int i = 0 ; i < n ; ++i )
+    {
+      for( int j = 0 ; j < m ; ++j )
+	{
+	  if( board[i][j] == '<' )
+	    {
+	      // vector<int> val;
+	      for( int k = j - 1, lastDig = '0', lastDigIdx = j, num = 0;
+		   k >= 0 ; --k )
+		{
+		  int tmp = board[i][k];
+		  if( isdigit(tmp) && tmp > lastDig )
+		    {
+		      ++cnt;
+		      ++num;
+		      for( int l = k ; l < lastDigIdx; ++l )
+			p[i][l] = cnt;
+		      // val.push_back(tmp - '0');
+		      add( cnt, T, tmp - lastDig, -num );
+		      sum += tmp - lastDig;
+		      lastDig = tmp;
+		      lastDigIdx = k;
+		    }
+		}
+	      // for( int k = 0 ; k < val.size() ; ++k )
+	      // 	{
+	      // 	  int tmp = val.size() - k - 1;
+	      // 	  add( cnt - tmp, T, val[k], tmp);
+	      // 	}
+	    }
+	  else if( board[i][j] == '>' )
+	    {
+	      // vector<int> val;
+	      for( int k = j + 1, lastDig = '0', lastDigIdx = j, num = 0;
+		   k < m; ++k )
+		{
+		  int tmp = board[i][k];
+		  if( isdigit(tmp) && tmp > lastDig )
+		    {
+		      ++cnt;
+		      ++num;
+		      for( int l = lastDigIdx + 1; l <= k; ++l )
+			p[i][l] = cnt;
+		      // val.push_back( lastDig - '0' );
+		      add( cnt, T, tmp - lastDig, -num );
+		      sum += tmp - lastDig;
+		      lastDig = tmp;
+		      lastDigIdx = k;
+		    }
+		}
+	      // for( int k = 0; k < val.size(); ++k )
+	      // 	{
+	      // 	  int tmp = val.size() - k - 1;
+	      // 	  add( cnt - tmp, T, val[k], tmp);
+	      // 	}
+	    }
+	}
+    }
+  for( int i = 0 ; i < m ; ++i )
+    for( int j = 0 ; j < n ; ++j )
+      {
+	if( board[j][i] == 'A' )
+	  {
+	    for( int k = j - 1, lastDig = '0', num = 0;
+		 k >= 0 ; --k )
+	      {
+		int tmp = board[k][i];
+		if( isdigit(tmp) && tmp > lastDig )
+		  {
+		    ++cnt;
+		    ++num;
+		    // for( int l = lastDigIdx - 1; l >= k; --l )
+		    for( int l = j - 1; l >= k; --l )
+		      if( p[l][i] > 0 )
+			{
+			  unordered_set<int> sett;
+			  for( int o = i; o >= 0 && p[l][o] >= p[l][i]; --o )
+			    if( sett.find(p[l][o]) == sett.end() )
+			      {
+				add( cnt, p[l][o], inf, 0);
+				sett.insert( p[l][o] );
+			      }
+			  for( int o = i + 1; o < m && p[l][o] >= p[l][i]; ++o )
+			    if( sett.find( p[l][o] ) == sett.end() )
+			      {
+				add( cnt, p[l][o], inf, 0);
+				sett.insert( p[l][o] );
+			      }
+			}
+		    add( S, cnt, tmp - lastDig, -num);
+		    sum += tmp - lastDig;
+		    lastDig = tmp;
+		  }
+	      }
+	  }
+	else if( board[j][i] == 'V' )
+	  {
+	    for( int k = j + 1, lastDig = '0', num = 0;
+		 k < n; ++k )
+	      {
+		int tmp = board[k][i];
+		if( isdigit(tmp) && tmp > lastDig )
+		  {
+		    ++cnt;
+		    ++num;
+		    // for( int l = lastDigIdx + 1; l <= k ; ++l )
+		    for( int l = j + 1 ; l <= k ; ++l )
+		      if( p[l][i] > 0 )
+			{
+			  unordered_set<int> sett;
+			  for( int o = i; o >= 0 && p[l][o] >= p[l][i]; --o )
+			    if( sett.find( p[l][o] ) == sett.end() )
+			      {
+				add( cnt, p[l][o], inf, 0);
+				sett.insert( p[l][o] );
+			      }
+			  for( int o = i + 1; o < m && p[l][o] >= p[l][i]; --o )
+			    if( sett.find( p[l][o] ) == sett.end() )
+			      {
+				add( cnt, p[l][o], inf, 0);
+				sett.insert( p[l][o] );
+			      }
+			}
+		    add( S, cnt, tmp - lastDig, -num );
+		    sum += tmp - lastDig;
+		    lastDig = tmp;
+		  }
+	      }
+	  }
+      }
+  // for( int i = 0 ; i < n ; ++i )
+  //   {
+  //     for( int j = 0 ; j < m ; ++j )
+  // 	cout << p[i][j] ;
+  //     cout << endl;
+  //   }
+  return sum - mmf();
+  // return sum - mf();
+}
+int main()
+{
+  LaserTowersDiv1 a;
+  // string b[] = { 
+  //   "..................",
+  //   "........6<........",
+  //   "..................",
+  //   "........1<V.......",
+  //   "........4.........",
+  //   ".>...............5",
+  //   "...2..........<...",
+  //   "........2.........",
+  //   "........A........A",
+  //   "........9.........",
+  //   "..........1.......",
+  //   ".....>....2......."
+  // };
+
+  string b[] = {"..V>....39.2.8...97.........5.3....",
+  		"..2<.V5.AA.AVA44VA>9........6......",
+  		"..............7............<.>..6..",
+  		".7.<...7>..........5...............",
+  		"..........6......................<.",
+  		"9..<..AA.>......................5..",
+  		".3.<..>...........................5",
+  		"6........6................<..>..7.7",
+  		"......5..<.>...................57..",
+  		"4..<..>.......................6....",
+  		".7..6........6.............<.>....4",
+  		".........6...<.A.>.............7...",
+  		"......7......................<.6.V.",
+  		"..........6...6............<A>...4.",
+  		"................6...........<.AA...",
+  		"9..<A5...VAV..A>...............7...",
+  		"..65......................<..V.V...",
+  		"....5.........<V.VVA>....7.........",
+  		"..............6............<>..5..3",
+  		"..6.....................<>.5.6.....",
+  		"AA.....>......................5....",
+  		".............5..............<.>...6",
+  		".....6..............<>........6....",
+  		"..............5............<>.....7",
+  		"7...............7.............<....",
+  		"6.......<.V..>.................5...",
+  		"7..<..>........5.......7...........",
+  		"............5............<VV..V.A6A",
+  		"..................6...............<",
+  		"7...<.V>.1..................6......",
+  		"VV.>......1...................6....",
+  		"2.....4...6..............<3.>.....5",
+  		".2........686....72........3..1...<"};
+
+    // "..89..",
+    // "..44..",
+    // "941..<",
+    // ".9.8.<",
+    // "...A..",
+    // "..A..."};
+    // ".........135...1..........<>8.3.",
+    // "..8.6..............4..9....<..AV",
+    // "..58.6<>...9........7.......7...",
+    // "......6..............<.>....75..",
+    // "6.............<AV.6AA...V....AV.",
+    // "6.AA.A.VV.A.V>...............5..",
+    // "7..<.>.......................7..",
+    // "..>.........5...............5...",
+    // "6.<>................7...........",
+    // "............5....4.....<.....V..",
+    // ".7.............7...........<....",
+    // "....1.....5..........<A>...5....",
+    // "........6...........<..>.5.....6",
+    // "..6................<...V..>....7",
+    // "6.<>................6...........",
+    // "..>.....................6.......",
+    // "....5..........<.AA>..5.........",
+    // "..........5........<.....A>....6",
+    // ".........5........<V.....V..A.5.",
+    // "...5...........<.>.........6....",
+    // "........5.................<.V...",
+    // "......7...<..>............5....5",
+    // ".......7.............<>...5.....",
+    // "A...AV...A.A.V>...........7..6..",
+    // "V.V......>................7.5...",
+    // "...>........3..........77.......",
+    // "...6............3...<>........5.",
+    // "3..<V.....>..............7......",
+    // "4....5...<>.................5...",
+    // ".A.......VV>...........7........",
+    // "2.6<68>..2..................6...",
+    // ".......6253..5.....4...9.9.<...."};
+
+    // {
+    //   ".5.1<8..3...>....4..9..7....4....",
+    //   "...6......9...<>..4....1........7",
+    //   "................5.....3...<.....7",
+    //   ".>8..........5...................",
+    //   "1<AA>.......................6....",
+    //   "1<>.....................5........",
+    //   "1..5<.>......................77..",
+    //   "..5.....................<.>....2.",
+    //   ".........6.........<A.A.V.>....1.",
+    //   "A..>.............7.......5...6...",
+    //   ".7............<..A.....A..V.A....",
+    //   "...........5..........<.......A7.",
+    //   ">...........6..............5.....",
+    //   "6<VV....A........VA....V....VA>7.",
+    //   "2...<A.7V.A6......VV>6....3......",
+    //   ".V....V......6..5.......7.....V..",
+    //   "4.....................<......V...",
+    //   "......6..5<.V.>.................8",
+    //   "9.............<V...............A.",
+    //   "V...................V.>.........2",
+    //   "....6..............6..<....A...>2",
+    //   "4.............<......A>.........4",
+    //   "5....<6..A..6A>...7..........7..3",
+    //   ".7.6.....<.A....A........A.>...2.",
+    //   "5...<..A7V.V.VV5V7.......V......A",
+    //   ".65.V>.........5....7..7..7.5.5..",
+    //   ".....7.........................<.",
+    //   ".....6...............<.....>...7.",
+    //   "64...<.V..>..................7...",
+    //   ".....6.....................<...VV",
+    //   ".4...<....>...........6.........4",
+    //   "....6>...2.9....2...5............",
+    //   "..7....9.....83.......<..6.>..13."}
+    // ;
+
+    // {">2"};
+// {"."};
+    // {".9",
+	       // 	">3",
+	       // 	".A"};
+    // {
+    //   "..V..",
+    //   ">.54.",
+    //   ".>3.6",
+    //   "9..A."
+    // };
+
+  // {
+  //   ".9V.",
+  //     ">..7",
+  //     ".A1."
+  // };
+
+    // {
+    //   "........7..7......4...<...V9.5.",
+    //   ">.........2.........5..46......",
+    //   ".6...........9..<..>...5.......",
+    //   ".6...................<..A>...5.",
+    //   ".V>....................6.......",
+    //   ".....57.............<...>....7.",
+    //   "..............6.........<V....7",
+    //   "V..V7..V..AA>..............61..",
+    //   "..V.......V..A.....>.....5.....",
+    //   "......7....V....>.........7....",
+    //   "1...........<>..............6..",
+    //   "............5...........<......",
+    //   ".........6..V.......V...V..A...",
+    //   ".2...........<....A..>....7....",
+    //   "5..........................<...",
+    //   ".............V...5...>.....6...",
+    //   "........5.......V.V....A...>.8.",
+    //   ".....A.........7.....>......5..",
+    //   "96.........................<...",
+    //   "....AV..............7V.....VA.A",
+    //   "..............5....6........<.V",
+    //   "..6................<........V..",
+    //   "....V..............>.......5..6",
+    //   "8.6................<...>....6..",
+    //   ".........A.............V.....A.",
+    //   ".....6A........A.A.>.....6.....",
+    //   "69....<.A>.............3.......",
+    //   "...2.....<....A.......>...2.6..",
+    //   "...76..5.....7..7..5........7<.",
+    //   "...8.......6..<..V5>.....9..7..",
+    //   "....7.....5.5.<>.4...7.556.4..."};
+  vector<string> bb;
+  for( int i = 0 ; i < sizeof(b) / sizeof(b[0]); ++i )
+    bb.push_back( b[i] );
+  // cout << a.countMaxEnemies(bb) << endl;
+
+  return 0;
+}
